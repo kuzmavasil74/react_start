@@ -1,22 +1,30 @@
-const MailBox = ({ boxUsers, boxTitle, mailBoxCount = 0 }) => {
+// rafce -> snippet for react functional component
+import clsx from 'clsx'
+import css from './MailBox.module.css'
+import MailBoxList from '../MailBoxList/MailBoxList'
+
+const MailBox = ({ users, boxTitle, mailBoxCount = 0 }) => {
+  const isMailBoxIsFull = mailBoxCount === 0
+
   return (
-    <div>
-      <h2>{boxTitle}</h2>
-      {mailBoxCount === 0 ? (
+    <div
+      className={clsx(css.mailbox, {
+        [css.full]: isMailBoxIsFull,
+      })}
+    >
+      <h2 className={css.mailboxTitle}>{boxTitle}</h2>
+      {isMailBoxIsFull ? (
         <p>
           <b>
-            We appologize for the inconvenience. There are currently no boxes
-            available to order.
+            Приносимо вибачення за незручності. Наразі немає доступних скриньок
+            для замовлення.
           </b>
         </p>
       ) : (
-        <p>Number of active mailboxes: {mailBoxCount}</p>
+        <p>Кількість активних поштових скриньок: {mailBoxCount}</p>
       )}
-      <ul>
-        {boxUsers.map((user) => {
-          return <li key={user.id}>{user.userEmail}</li>
-        })}
-      </ul>
+
+      <MailBoxList users={users} />
     </div>
   )
 }
