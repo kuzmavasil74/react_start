@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DrinksCounter from './components/DrinksCounter/DrinksCounter'
 import DrinksValues from './components/DrinksValues/DrinksValues'
 // import MailBox from './components/MailBox/MailBox'
@@ -6,35 +6,52 @@ import DrinksValues from './components/DrinksValues/DrinksValues'
 // import meestExpressUsers from './MeestExpres.json'
 // import novaPoshtaUsers from './NewPost.json'
 // import ukrPoshtaUsers from './UKRPost.json'
-
+const initialDrinks = { beer: 0, whiskey: 0, wine: 0 }
 function App() {
-  const [counter, setCounter] = useState(0)
-  const [drinks, setDrinks] = useState({ beer: 0, whiskey: 0, wine: 0 })
+  const [drinks, setDrinks] = useState(() => {
+    const stringifiedDrinks = localStorage.getItem('drinksValues')
+    const parsedDrinks = JSON.parse(stringifiedDrinks) ?? initialDrinks
+    return parsedDrinks
+  })
 
+  const [isVisableBar, setIsVisableBar] = useState(false)
   const handleLogDrink = (drinkName) => {
-    console.log('drinkName: ', drinkName)
     if (drinks[drinkName] === 2 && drinkName === 'beer') {
       alert('Sorry, you exedded the beer limit. Please choose another drink!')
       return
     }
     setDrinks({ ...drinks, [drinkName]: drinks[drinkName] + 1 })
   }
-  const handleIncrementCounter = () => {
-    setCounter(counter + 1)
-  }
-  const handleDecrement = () => {
-    if (counter === 0) return
 
-    setCounter(counter - 1)
+  const handleResetDrinks = () => {
+    setDrinks(initialDrinks)
   }
-  const drinksTotal = drinks.beer + drinks.whiskey + drinks.wine
+
+  const onToggleMiniBarVisibibity = () => {
+    setIsVisableBar(!isVisableBar)
+  }
+  const drinksTotal = Object.values(drinks).reduce((acc, curr) => acc + curr, 0)
+
+  useEffect(() => {
+    localStorage.setItem('drinksValues', JSON.stringify(drinks))
+  }, [drinks])
 
   return (
     <div>
-      <button onClick={handleIncrementCounter}>Counter: {counter}</button>
-      <button onClick={handleDecrement}>-</button>
-      <DrinksValues drinks={drinks} total={drinksTotal} />
-      <DrinksCounter handleLogDrink={handleLogDrink} />
+      <button onClick={onToggleMiniBarVisibibity}>
+        {isVisableBar ? 'Hide' : 'Show'} mini-bar
+      </button>
+      {isVisableBar && (
+        <>
+          <DrinksValues drinks={drinks} total={drinksTotal} />
+          <DrinksCounter
+            total={drinksTotal}
+            handleResetDrinks={handleResetDrinks}
+            onToggleMiniBarVisibibity={onToggleMiniBarVisibibity}
+            handleLogDrink={handleLogDrink}
+          />
+        </>
+      )}
     </div>
   )
 }
